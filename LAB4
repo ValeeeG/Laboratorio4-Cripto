@@ -1,0 +1,52 @@
+// ==UserScript==
+// @name         LAB4
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  try to take over the world!
+// @author       Valentina García
+// @match        https://cripto.tiiny.site/
+// @run-at       document-end
+// @require      https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js#sha512=E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA==
+// @grant        none
+
+// ==/UserScript==
+/*globals CryptoJS*/
+(function() {
+    'use strict';
+
+   // ITEM 1: encontrar la key
+var contenidoPagina = document.body.innerText;
+var expresionRegular = /[A-Z]/g;
+var coincidencias = contenidoPagina.match(expresionRegular);
+
+if (coincidencias) {
+  var mayusculasEncontradas = coincidencias.join('');
+  console.log('La llave es:' ,mayusculasEncontradas);
+
+} else {
+  console.log('No se encontraron letras mayúsculas en la página.');
+}
+  //ITEM 2: cantidad de mensajes cifrados
+   let mensajesCifrados = document.querySelectorAll('div[class^="M"]');
+   console.log("Los mensajes cifrados son: " + mensajesCifrados.length);
+
+
+  // ITEM 3: Obtener cada mensaje cifrado y descifrarlo
+     mensajesCifrados.forEach((mensajeCifrado) => {
+      let mensajeCifradoBase64 = mensajeCifrado.id;
+       let mensajeCifradoBytes =
+           CryptoJS.enc.Base64.parse(mensajeCifradoBase64);
+            let mensajeDescifradoBytes = CryptoJS.TripleDES.decrypt(
+                { ciphertext: mensajeCifradoBytes },
+                CryptoJS.enc.Utf8.parse(mayusculasEncontradas),
+                { mode: CryptoJS.mode.ECB }
+            );
+            let mensajeDescifrado = mensajeDescifradoBytes.toString(
+                CryptoJS.enc.Utf8
+            );
+            console.log(mensajeCifradoBase64 + " " + mensajeDescifrado);
+            mensajeCifrado.innerText = mensajeDescifrado;
+        });
+
+
+})();
